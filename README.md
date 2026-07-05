@@ -164,8 +164,11 @@ ai-video-generator/
 
 ### Phase 2
 
-- F5-TTS integration
-- Voice profile management
+- [x] F5-TTS CLI adapter
+- [x] Local voice profile API and storage
+- [x] Per-scene narration API and audio playback UI
+- [ ] Install FFmpeg and a device-matched F5-TTS runtime
+- [ ] Validate real synthesis with reference audio
 
 ### Phase 3
 
@@ -236,6 +239,33 @@ npm run test
 npm run lint
 npm run build
 ```
+
+### Phase 2 TTS configuration
+
+F5-TTS runs as a separate local runtime so its PyTorch and accelerator
+dependencies do not destabilize the FastAPI environment. Install FFmpeg and
+F5-TTS using the device-specific instructions in the
+[official F5-TTS repository](https://github.com/SWivid/F5-TTS). Then configure
+the backend `.env`:
+
+``` dotenv
+F5_TTS_COMMAND=C:\path\to\f5-tts_infer-cli.exe
+F5_TTS_MODEL=F5TTS_v1_Base
+F5_TTS_DEVICE=cpu
+F5_TTS_TIMEOUT_SECONDS=900
+```
+
+Set `F5_TTS_DEVICE` to the accelerator supported by the installed PyTorch
+build. Keep model caches on a drive with sufficient free space. Reference
+recordings should be shorter than 12 seconds and include an exact transcript;
+see the [official inference guidance](https://github.com/SWivid/F5-TTS/blob/main/src/f5_tts/infer/README.md).
+
+Phase 2 API flow:
+
+1. `POST /api/v1/voices` with a voice name, transcript, and reference audio.
+2. `GET /api/v1/voices` to list local profiles.
+3. `POST /api/v1/audio/generate` with a voice profile ID and scene list.
+4. Play generated WAV files from the returned local `/media/...` URLs.
 
 ------------------------------------------------------------------------
 

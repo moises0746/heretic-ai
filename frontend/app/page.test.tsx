@@ -29,12 +29,19 @@ describe("Home", () => {
   });
 
   it("renders a structured video plan returned by the API", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
         ok: true,
         json: async () => videoPlan,
-      }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+    vi.stubGlobal(
+      "fetch",
+      fetchMock,
     );
     render(<Home />);
 
@@ -46,6 +53,7 @@ describe("Home", () => {
     expect(await screen.findByRole("heading", { name: videoPlan.title })).toBeInTheDocument();
     expect(screen.getByText(videoPlan.scenes[0].narration)).toBeInTheDocument();
     expect(screen.getByText(/cinematic solar flare/)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Add narration" })).toBeInTheDocument();
   });
 
   it("shows an API error and restores the submit button", async () => {
@@ -69,4 +77,3 @@ describe("Home", () => {
     });
   });
 });
-

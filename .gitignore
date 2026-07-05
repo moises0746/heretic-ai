@@ -8,7 +8,11 @@ node_modules/
 .next/
 coverage/
 storage/cache/*
+storage/audio/*
+storage/voices/*
 storage/videos/*
 !storage/cache/.gitkeep
+!storage/audio/.gitkeep
+!storage/voices/.gitkeep
 !storage/videos/.gitkeep
 

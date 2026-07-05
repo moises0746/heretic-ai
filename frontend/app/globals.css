@@ -31,7 +31,7 @@ main {
 .eyebrow { color: #ad8cff; font-weight: 700; letter-spacing: .16em; }
 h1 { font-size: clamp(2.5rem, 7vw, 5.5rem); line-height: .98; margin: 24px 0; }
 .subtitle { color: #aeb6c4; font-size: 1.2rem; }
-form, .result {
+form, .result, .voice-panel {
   display: grid;
   gap: 14px;
   margin-top: 40px;
@@ -69,6 +69,15 @@ button:disabled { cursor: not-allowed; opacity: .55; }
   justify-content: space-between;
   gap: 20px;
 }
+input, select {
+  width: 100%;
+  border: 1px solid #464d5d;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #0c0f15;
+  color: inherit;
+  font: inherit;
+}
 .result-heading h2, .scene-heading h3 { margin: 0; }
 .result-heading > span, .scene-heading > span {
   flex: 0 0 auto;
@@ -99,4 +108,16 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 }
 .scene p { margin-bottom: 0; }
 .image-prompt { color: #aeb6c4; font-size: .9rem; }
+.voice-panel {
+  margin-top: 18px;
+  background: #11141c;
+}
+.voice-panel h2 { margin: 0; }
+.panel-copy { margin: 8px 0 0; color: #aeb6c4; }
+.voice-form { margin-top: 12px; padding: 0; border: 0; background: transparent; }
+.generate-audio { display: grid; gap: 12px; margin-top: 10px; }
+.audio-list { display: grid; gap: 12px; margin: 10px 0 0; padding: 0; list-style: none; }
+.audio-list li { display: grid; gap: 8px; }
+.audio-list span { font-size: .85rem; font-weight: 750; }
+.audio-list audio { width: 100%; }
 
