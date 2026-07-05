@@ -225,6 +225,103 @@ Verify the API at `http://127.0.0.1:8000/health` and open the UI at
 
 ------------------------------------------------------------------------
 
+## Git and GitHub Setup
+
+### Install and configure Git on Windows
+
+``` powershell
+winget install --id Git.Git --exact
+git --version
+```
+
+Restart the terminal after installation. Configure your identity for this
+repository. When GitHub email privacy is enabled, copy your GitHub-provided
+`noreply` address from <https://github.com/settings/emails>.
+
+``` powershell
+git config user.name "YOUR_GITHUB_USERNAME"
+git config user.email "YOUR_GITHUB_NOREPLY_EMAIL"
+git config --get user.name
+git config --get user.email
+```
+
+These commands use repository-local configuration. Add `--global` only if the
+same identity should apply to every repository on the computer.
+
+### Clone the existing repository
+
+``` powershell
+git clone https://github.com/moises0746/heretic-ai.git
+cd heretic-ai
+```
+
+### Connect an existing local project
+
+Run these commands from the project root only when it is not already connected
+to GitHub:
+
+``` powershell
+git init
+git branch -M main
+git remote add origin https://github.com/moises0746/heretic-ai.git
+git remote -v
+```
+
+If `origin` already exists but has the wrong URL, correct it with:
+
+``` powershell
+git remote set-url origin https://github.com/moises0746/heretic-ai.git
+```
+
+### First push
+
+Review the staged files before committing. Local `.env` files, virtual
+environments, dependencies, and generated artifacts must remain excluded by
+`.gitignore`.
+
+``` powershell
+git add .
+git status
+git commit -m "Initial project setup"
+git push -u origin main
+```
+
+### Pull and push routine changes
+
+Pull before starting work. `--ff-only` prevents Git from creating an
+unexpected merge commit.
+
+``` powershell
+git pull --ff-only origin main
+```
+
+After making and validating changes:
+
+``` powershell
+git add .
+git status
+git commit -m "Describe the change"
+git push origin main
+```
+
+### Fix an email privacy rejection
+
+If GitHub rejects a new repository's first push because existing local commits
+contain a private email, set the correct `noreply` address and rewrite the
+local commits before retrying:
+
+``` powershell
+git config user.email "YOUR_GITHUB_NOREPLY_EMAIL"
+git rebase --root --exec "git commit --amend --no-edit --reset-author"
+git log --format="%h %an <%ae>"
+git push origin main
+```
+
+Rewriting published history requires coordination and a force push. Do not use
+this procedure on commits already shared with other contributors.
+
+------------------------------------------------------------------------
+
 ## License
 
 MIT License
