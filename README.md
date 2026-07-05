@@ -9,6 +9,7 @@ Instead of only creating videos, the platform becomes an all-in-one AI content p
 ```
 Prompt → AI Story Planner → Script, Storyboard, Voice, Images, Video, Music, Subtitles, Podcast, Blog, Social Media, Commercial, Vlog, Product Ads, Presentation, Marketing Assets
 ```
+<img width="1459" height="1250" alt="image" src="https://github.com/user-attachments/assets/227d5560-274f-458f-8864-86e35408c7f3" />
 
 ---
 
