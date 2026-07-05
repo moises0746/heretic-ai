@@ -1,19 +1,32 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Image from "next/image";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
 
+type Scene = {
+  narration: string;
+  image_prompt: string;
+  duration_seconds: number;
+};
+
+type VideoPlan = {
+  title: string;
+  scenes: Scene[];
+  model: string;
+};
+
 export default function Home() {
   const [prompt, setPrompt] = useState("");
-  const [script, setScript] = useState("");
+  const [videoPlan, setVideoPlan] = useState<VideoPlan | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setScript("");
+    setVideoPlan(null);
     setIsLoading(true);
 
     try {
@@ -24,7 +37,7 @@ export default function Home() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail ?? "Script generation failed");
-      setScript(data.script);
+      setVideoPlan(data as VideoPlan);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Unexpected error");
     } finally {
@@ -35,6 +48,10 @@ export default function Home() {
   return (
     <main>
       <section className="hero">
+        <header className="brand" aria-label="Heretic home">
+          <Image className="brand-mark" src="/heretic-mark.svg" alt="" width={48} height={48} priority />
+          <span className="brand-name">Heretic</span>
+        </header>
         <p className="eyebrow">SELF-HOSTED VIDEO LAB</p>
         <h1>Turn one idea into a production-ready script.</h1>
         <p className="subtitle">The first working slice of the local AI video pipeline.</p>
@@ -56,11 +73,28 @@ export default function Home() {
           </button>
         </form>
 
-        {error && <p className="message error">{error}</p>}
-        {script && (
+        {error && <p className="message error" role="alert">{error}</p>}
+        {videoPlan && (
           <article className="result">
-            <h2>Generated script</h2>
-            <p>{script}</p>
+            <div className="result-heading">
+              <div>
+                <p className="result-label">Generated video plan</p>
+                <h2>{videoPlan.title}</h2>
+              </div>
+              <span>{videoPlan.scenes.length} scenes</span>
+            </div>
+            <ol className="scene-list">
+              {videoPlan.scenes.map((scene, index) => (
+                <li className="scene" key={`${index}-${scene.narration}`}>
+                  <div className="scene-heading">
+                    <h3>Scene {index + 1}</h3>
+                    <span>{scene.duration_seconds}s</span>
+                  </div>
+                  <p>{scene.narration}</p>
+                  <p className="image-prompt"><strong>Visual:</strong> {scene.image_prompt}</p>
+                </li>
+              ))}
+            </ol>
           </article>
         )}
       </section>

@@ -155,11 +155,12 @@ ai-video-generator/
 
 ### Phase 1
 
-- Project setup
-- Next.js UI
-- FastAPI backend
-- Ollama integration
-- login page
+- [x] Project setup
+- [x] Next.js prompt and structured scene UI
+- [x] FastAPI backend
+- [x] Ollama integration
+- [x] Structured video plan with exact scene durations
+- [x] Backend and frontend automated tests
 
 ### Phase 2
 
@@ -169,7 +170,7 @@ ai-video-generator/
 ### Phase 3
 
 - FLUX image generation
-- Scene planning
+- Scene image generation from Phase 1 prompts
 
 ### Phase 4
 
@@ -181,6 +182,7 @@ ai-video-generator/
 - Queue system
 - Docker deployment
 - Authentication
+- Login, registration, and subscription pages
 
 ------------------------------------------------------------------------
 
@@ -222,6 +224,18 @@ npm run dev
 
 Verify the API at `http://127.0.0.1:8000/health` and open the UI at
 `http://localhost:3000`.
+
+Run the Phase 1 checks before committing changes:
+
+``` powershell
+cd backend
+.\.venv\Scripts\python.exe -m pytest -q
+
+cd ..\frontend
+npm run test
+npm run lint
+npm run build
+```
 
 ------------------------------------------------------------------------
 

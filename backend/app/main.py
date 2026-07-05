@@ -32,7 +32,7 @@ async def generate_script(
     app_settings: Settings = Depends(get_settings),
 ) -> ScriptGenerateResponse:
     try:
-        script = await OllamaService(app_settings).generate_script(
+        plan = await OllamaService(app_settings).generate_video_plan(
             request.prompt, request.duration_seconds
         )
     except OllamaUnavailableError as exc:
@@ -41,4 +41,4 @@ async def generate_script(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(exc),
         ) from exc
-    return ScriptGenerateResponse(script=script, model=app_settings.ollama_model)
+    return ScriptGenerateResponse(**plan.model_dump(), model=app_settings.ollama_model)

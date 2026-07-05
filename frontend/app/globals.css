@@ -13,6 +13,21 @@ main {
   background: radial-gradient(circle at top left, #38205e 0, transparent 38%), #090b10;
 }
 .hero { width: min(760px, 100%); margin: 0 auto; }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 56px;
+}
+.brand-mark {
+  display: block;
+  filter: drop-shadow(0 10px 22px rgb(143 98 255 / 32%));
+}
+.brand-name {
+  font-size: 1.4rem;
+  font-weight: 850;
+  letter-spacing: -.035em;
+}
 .eyebrow { color: #ad8cff; font-weight: 700; letter-spacing: .16em; }
 h1 { font-size: clamp(2.5rem, 7vw, 5.5rem); line-height: .98; margin: 24px 0; }
 .subtitle { color: #aeb6c4; font-size: 1.2rem; }
@@ -48,4 +63,40 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .message { margin-top: 20px; }
 .error { color: #ff9d9d; }
 .result p { white-space: pre-wrap; line-height: 1.7; }
+.result-heading, .scene-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.result-heading h2, .scene-heading h3 { margin: 0; }
+.result-heading > span, .scene-heading > span {
+  flex: 0 0 auto;
+  color: #c7b5ff;
+  font-size: .85rem;
+  font-weight: 750;
+}
+.result-label {
+  margin: 0 0 6px;
+  color: #ad8cff;
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.scene-list {
+  display: grid;
+  gap: 14px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.scene {
+  padding: 18px;
+  border: 1px solid #343946;
+  border-radius: 12px;
+  background: #0c0f15;
+}
+.scene p { margin-bottom: 0; }
+.image-prompt { color: #aeb6c4; font-size: .9rem; }
 

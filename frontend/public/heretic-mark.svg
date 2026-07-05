@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title description">
+  <title id="title">Heretic logo</title>
+  <desc id="description">An angular letter H inside a violet hexagon</desc>
+  <defs>
+    <linearGradient id="surface" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B99AFF"/>
+      <stop offset="1" stop-color="#7441F3"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#surface)" d="M32 2 57.98 17v30L32 62 6.02 47V17L32 2Z"/>
+  <path fill="#0B0D12" d="M17 16h9v11h12V16h9v32h-9V36H26v12h-9V16Z"/>
+  <path fill="#F4EEFF" d="m26 27 12 9v-9H26Z" opacity=".92"/>
+</svg>
+
