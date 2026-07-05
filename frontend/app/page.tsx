@@ -73,9 +73,11 @@ export default function Home() {
           <Image className="brand-mark" src="/heretic-mark.svg" alt="" width={48} height={48} priority />
           <span className="brand-name">Heretic</span>
         </header>
-        <p className="eyebrow">SELF-HOSTED VIDEO LAB</p>
-        <h1>Turn one idea into a production-ready script.</h1>
-        <p className="subtitle">The first working slice of the local AI video pipeline.</p>
+        <p className="eyebrow">PRIVATE. LOCAL. YOURS.</p>
+        <h1>Turn one idea into a complete video.</h1>
+        <p className="subtitle">
+          Generate scripts, narration, visuals, subtitles, and MP4s—all on your own machine.
+        </p>
 
         <form onSubmit={handleSubmit}>
           <label htmlFor="prompt">Video topic</label>
