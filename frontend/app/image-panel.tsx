@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { runQueuedJob } from "../lib/jobs";
 
 type Scene = {
   narration: string;
@@ -19,9 +20,10 @@ type ImageAsset = {
 type ImagePanelProps = {
   apiBaseUrl: string;
   scenes: Scene[];
+  onGenerated?: (images: ImageAsset[]) => void;
 };
 
-export default function ImagePanel({ apiBaseUrl, scenes }: ImagePanelProps) {
+export default function ImagePanel({ apiBaseUrl, scenes, onGenerated }: ImagePanelProps) {
   const [images, setImages] = useState<ImageAsset[]>([]);
   const [error, setError] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -29,16 +31,16 @@ export default function ImagePanel({ apiBaseUrl, scenes }: ImagePanelProps) {
   async function generateImages() {
     setError("");
     setImages([]);
+    onGenerated?.([]);
     setIsGenerating(true);
     try {
-      const response = await fetch(`${apiBaseUrl}/api/v1/images/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenes, width: 1280, height: 720, seed: 0 }),
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.detail ?? "Image generation failed");
+      const result = await runQueuedJob<{ images: ImageAsset[] }>(
+        apiBaseUrl,
+        "images",
+        { scenes, width: 1280, height: 720, seed: 0 },
+      );
       setImages(result.images);
+      onGenerated?.(result.images);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Unexpected error");
     } finally {
@@ -78,4 +80,3 @@ export default function ImagePanel({ apiBaseUrl, scenes }: ImagePanelProps) {
     </section>
   );
 }
-

@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     flux_cache_dir: Path | None = None
     ffmpeg_command: str = "ffmpeg"
     ffmpeg_timeout_seconds: float = 900
+    queue_backend: str = "memory"
+    redis_url: str = "redis://127.0.0.1:6379/0"
+    queue_name: str = "heretic"
+    queue_job_timeout_seconds: int = 3600
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

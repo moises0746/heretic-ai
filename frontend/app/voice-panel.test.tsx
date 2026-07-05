@@ -27,9 +27,16 @@ describe("VoicePanel", () => {
         })
         .mockResolvedValueOnce({
           ok: true,
+          json: async () => ({ id: "job-1", status: "queued" }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
           json: async () => ({
-            job_id: "job-1",
-            audio: [{ scene_index: 1, path: "audio/job-1/scene-001.wav", url: "/media/audio/job-1/scene-001.wav" }],
+            id: "job-1",
+            status: "finished",
+            result: {
+              audio: [{ scene_index: 1, path: "audio/job-1/scene-001.wav", url: "/media/audio/job-1/scene-001.wav" }],
+            },
           }),
         }),
     );
@@ -57,4 +64,3 @@ describe("VoicePanel", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Could not load voice profiles");
   });
 });
-

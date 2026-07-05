@@ -55,6 +55,7 @@ describe("Home", () => {
     expect(screen.getByText(/cinematic solar flare/)).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: "Add narration" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Generate scene images" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Assemble video" })).toBeInTheDocument();
   });
 
   it("shows an API error and restores the submit button", async () => {

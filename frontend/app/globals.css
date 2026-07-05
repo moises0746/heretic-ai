@@ -31,7 +31,7 @@ main {
 .eyebrow { color: #ad8cff; font-weight: 700; letter-spacing: .16em; }
 h1 { font-size: clamp(2.5rem, 7vw, 5.5rem); line-height: .98; margin: 24px 0; }
 .subtitle { color: #aeb6c4; font-size: 1.2rem; }
-form, .result, .voice-panel, .image-panel {
+form, .result, .voice-panel, .image-panel, .render-panel {
   display: grid;
   gap: 14px;
   margin-top: 40px;
@@ -121,6 +121,7 @@ input, select {
 .audio-list span { font-size: .85rem; font-weight: 750; }
 .audio-list audio { width: 100%; }
 .image-panel { margin-top: 18px; background: #11141c; }
+.render-panel { margin-top: 18px; background: #11141c; }
 .image-panel h2 { margin: 0; }
 .panel-heading {
   display: flex;
@@ -141,6 +142,10 @@ input, select {
 .image-grid img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
 .image-grid li div { display: flex; justify-content: space-between; gap: 12px; padding: 12px; }
 .image-grid span { color: #aeb6c4; font-size: .8rem; }
+.video-result { display: grid; gap: 14px; margin-top: 12px; }
+.video-result video { width: 100%; border-radius: 12px; background: #050608; }
+.download-links { display: flex; flex-wrap: wrap; gap: 12px; }
+.download-links a { color: #c7b5ff; font-weight: 750; }
 @media (max-width: 640px) {
   .panel-heading { align-items: stretch; flex-direction: column; }
   .image-grid { grid-template-columns: 1fr; }

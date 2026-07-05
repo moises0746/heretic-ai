@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { runQueuedJob } from "../lib/jobs";
 
 type Scene = {
   narration: string;
@@ -22,9 +23,10 @@ type AudioAsset = {
 type VoicePanelProps = {
   apiBaseUrl: string;
   scenes: Scene[];
+  onGenerated?: (audio: AudioAsset[]) => void;
 };
 
-export default function VoicePanel({ apiBaseUrl, scenes }: VoicePanelProps) {
+export default function VoicePanel({ apiBaseUrl, scenes, onGenerated }: VoicePanelProps) {
   const [voices, setVoices] = useState<VoiceProfile[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState("");
   const [audio, setAudio] = useState<AudioAsset[]>([]);
@@ -81,16 +83,16 @@ export default function VoicePanel({ apiBaseUrl, scenes }: VoicePanelProps) {
   async function generateAudio() {
     setError("");
     setAudio([]);
+    onGenerated?.([]);
     setIsGenerating(true);
     try {
-      const response = await fetch(`${apiBaseUrl}/api/v1/audio/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ voice_profile_id: selectedVoiceId, scenes }),
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.detail ?? "Audio generation failed");
+      const result = await runQueuedJob<{ audio: AudioAsset[] }>(
+        apiBaseUrl,
+        "audio",
+        { voice_profile_id: selectedVoiceId, scenes },
+      );
       setAudio(result.audio);
+      onGenerated?.(result.audio);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Unexpected error");
     } finally {
@@ -158,4 +160,3 @@ export default function VoicePanel({ apiBaseUrl, scenes }: VoicePanelProps) {
     </section>
   );
 }
-

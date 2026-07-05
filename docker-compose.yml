@@ -1,0 +1,95 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8000
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment: &backend-environment
+      APP_ENV: production
+      STORAGE_ROOT: /app/storage
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:1.7b}
+      CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      FFMPEG_COMMAND: /usr/bin/ffmpeg
+      QUEUE_BACKEND: redis
+      REDIS_URL: redis://redis:6379/0
+      QUEUE_NAME: heretic
+      QUEUE_JOB_TIMEOUT_SECONDS: 3600
+      FLUX_SCRIPT: /app/scripts/flux_infer.py
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./storage:/app/storage
+    depends_on:
+      redis:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+
+  video-worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    command:
+      - rq
+      - worker
+      - -u
+      - redis://redis:6379/0
+      - -S
+      - json
+      - heretic-video
+    environment: *backend-environment
+    volumes:
+      - ./storage:/app/storage
+    depends_on:
+      redis:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  redis-data:
+

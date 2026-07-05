@@ -80,3 +80,16 @@ class VideoRenderResponse(BaseModel):
     subtitle_path: str
     subtitle_url: str
 
+
+class JobSubmission(BaseModel):
+    id: str
+    status: str
+
+
+class JobStatus(BaseModel):
+    id: str
+    type: str
+    status: str
+    result: dict[str, object] | None = None
+    error: str | None = None
+

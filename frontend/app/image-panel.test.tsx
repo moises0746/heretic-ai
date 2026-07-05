@@ -19,21 +19,30 @@ describe("ImagePanel", () => {
   it("renders images returned by the local API", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          job_id: "image-job",
-          images: [
-            {
-              scene_index: 1,
-              prompt: scenes[0].image_prompt,
-              seed: 0,
-              path: "images/image-job/scene-001.png",
-              url: "/media/images/image-job/scene-001.png",
+      vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ id: "image-job", status: "queued" }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            id: "image-job",
+            status: "finished",
+            result: {
+              images: [
+                {
+                  scene_index: 1,
+                  prompt: scenes[0].image_prompt,
+                  seed: 0,
+                  path: "images/image-job/scene-001.png",
+                  url: "/media/images/image-job/scene-001.png",
+                },
+              ],
             },
-          ],
+          }),
         }),
-      }),
     );
     const { container } = render(
       <ImagePanel apiBaseUrl="http://127.0.0.1:8000" scenes={scenes} />,
@@ -63,4 +72,3 @@ describe("ImagePanel", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("FLUX runtime is unavailable");
   });
 });
-

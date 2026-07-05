@@ -180,15 +180,20 @@ ai-video-generator/
 
 ### Phase 4
 
-- FFmpeg renderer
-- Subtitle engine
+- [x] Scene-timed SRT subtitle engine
+- [x] FFmpeg image, audio, and subtitle assembly
+- [x] Local MP4 playback and download UI
+- [ ] Validate a full video using real Phase 2 and Phase 3 assets
 
 ### Phase 5
 
-- Queue system
-- Docker deployment
-- Authentication
-- Login, registration, and subscription pages
+- [x] In-memory development queue and job-status API
+- [x] Redis/RQ production queue with JSON serialization
+- [x] Redis Docker Compose service and health check
+- [x] Frontend, backend, Redis, and video-worker containers
+- [ ] Validate the Compose stack after Docker Desktop is installed
+- [ ] Authentication
+- [ ] Login, registration, and subscription pages
 
 ------------------------------------------------------------------------
 
@@ -298,6 +303,86 @@ FLUX_CACHE_DIR=D:\path\to\model-cache
 `POST /api/v1/images/generate` accepts the Phase 1 scene list, dimensions, and
 a base seed. It generates one local PNG per scene and returns `/media/images/...`
 URLs for preview and later video assembly.
+
+### Phase 4 video rendering
+
+Configure the shared FFmpeg executable in the backend `.env`:
+
+``` dotenv
+FFMPEG_COMMAND=C:\path\to\ffmpeg.exe
+FFMPEG_TIMEOUT_SECONDS=900
+```
+
+`POST /api/v1/videos/render` accepts the video title, scene list, Phase 2 audio
+assets, and Phase 3 image assets. Every scene must have exactly one audio file
+and one image in matching order. The renderer normalizes them to 1280x720 at
+30 FPS, pads or trims audio to the planned duration, embeds selectable English
+subtitles in the MP4, and also returns the standalone SRT file.
+
+### Phase 5 job queue
+
+Long-running audio, image, and video operations use `/api/v1/jobs/audio`,
+`/api/v1/jobs/images`, and `/api/v1/jobs/video`. Poll
+`GET /api/v1/jobs/{job_id}` until the status becomes `finished` or `failed`.
+
+Local development defaults to an in-memory queue and requires no additional
+service. Jobs are not durable across backend restarts. For durable jobs, install
+Docker Desktop and start the local-only Redis service:
+
+``` powershell
+docker compose up -d redis
+docker compose ps
+```
+
+Configure `backend/.env`:
+
+``` dotenv
+QUEUE_BACKEND=redis
+REDIS_URL=redis://127.0.0.1:6379/0
+QUEUE_NAME=heretic
+QUEUE_JOB_TIMEOUT_SECONDS=3600
+```
+
+Start a Windows-compatible AI worker from `backend/` in another terminal. It
+uses the host F5-TTS and FLUX runtimes while the container worker handles video:
+
+``` powershell
+.\.venv\Scripts\rq.exe worker -u redis://127.0.0.1:6379/0 -S json -w rq.worker.SpawnWorker heretic-audio heretic-images
+```
+
+Redis is bound to `127.0.0.1` by default. Do not expose this unauthenticated
+development service to other networks.
+
+### Docker deployment
+
+The Compose stack builds the Next.js frontend and FastAPI backend, starts a
+persistent Redis queue, and runs an FFmpeg video worker. Ollama remains on the
+host and is reached through `host.docker.internal`. Generated assets are bind
+mounted from the repository's `storage/` directory.
+
+Prerequisites:
+
+- Docker Desktop with access to drive D:
+- Ollama running on the host with the configured model installed
+- The Windows AI worker above for F5-TTS and FLUX jobs
+
+Start and verify the stack:
+
+``` powershell
+docker compose up -d --build
+docker compose ps
+docker compose logs --tail 100 backend video-worker
+```
+
+Open `http://localhost:3000`. Stop containers without deleting Redis data:
+
+``` powershell
+docker compose down
+```
+
+All published ports bind to `127.0.0.1`. The backend and worker run as non-root
+users with read-only root filesystems; only `/tmp` and the mounted `storage/`
+directory are writable.
 
 ------------------------------------------------------------------------
 

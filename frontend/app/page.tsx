@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import Image from "next/image";
 import ImagePanel from "./image-panel";
+import RenderPanel from "./render-panel";
 import VoicePanel from "./voice-panel";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -19,9 +20,25 @@ type VideoPlan = {
   model: string;
 };
 
+type AudioAsset = {
+  scene_index: number;
+  path: string;
+  url: string;
+};
+
+type ImageAsset = {
+  scene_index: number;
+  prompt: string;
+  seed: number;
+  path: string;
+  url: string;
+};
+
 export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [videoPlan, setVideoPlan] = useState<VideoPlan | null>(null);
+  const [audioAssets, setAudioAssets] = useState<AudioAsset[]>([]);
+  const [imageAssets, setImageAssets] = useState<ImageAsset[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,6 +46,8 @@ export default function Home() {
     event.preventDefault();
     setError("");
     setVideoPlan(null);
+    setAudioAssets([]);
+    setImageAssets([]);
     setIsLoading(true);
 
     try {
@@ -97,8 +116,23 @@ export default function Home() {
                 </li>
               ))}
             </ol>
-            <VoicePanel apiBaseUrl={apiBaseUrl} scenes={videoPlan.scenes} />
-            <ImagePanel apiBaseUrl={apiBaseUrl} scenes={videoPlan.scenes} />
+            <VoicePanel
+              apiBaseUrl={apiBaseUrl}
+              scenes={videoPlan.scenes}
+              onGenerated={setAudioAssets}
+            />
+            <ImagePanel
+              apiBaseUrl={apiBaseUrl}
+              scenes={videoPlan.scenes}
+              onGenerated={setImageAssets}
+            />
+            <RenderPanel
+              apiBaseUrl={apiBaseUrl}
+              title={videoPlan.title}
+              scenes={videoPlan.scenes}
+              audio={audioAssets}
+              images={imageAssets}
+            />
           </article>
         )}
       </section>

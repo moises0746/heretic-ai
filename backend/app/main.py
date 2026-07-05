@@ -10,13 +10,19 @@ from app.schemas import (
     ScriptGenerateResponse,
     ImageGenerateRequest,
     ImageGenerateResponse,
+    JobStatus,
+    JobSubmission,
     TTSGenerateRequest,
     TTSGenerateResponse,
+    VideoRenderRequest,
+    VideoRenderResponse,
     VoiceProfile,
 )
 from app.services.ollama import OllamaService, OllamaUnavailableError
 from app.services.image import FluxImageService, ImageGenerationError
+from app.services.job_queue import JobNotFoundError, create_queue_backend
 from app.services.tts import F5TTSService, TTSUnavailableError
+from app.services.video import VideoRenderer, VideoRenderError
 from app.services.voices import VoiceProfileError, VoiceProfileRepository
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -27,6 +33,7 @@ settings = get_settings()
 settings.storage_root.mkdir(parents=True, exist_ok=True)
 (settings.storage_root / "audio").mkdir(parents=True, exist_ok=True)
 (settings.storage_root / "images").mkdir(parents=True, exist_ok=True)
+(settings.storage_root / "videos").mkdir(parents=True, exist_ok=True)
 app = FastAPI(title="Heretic AI API", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
@@ -39,6 +46,11 @@ app.mount(
     "/media/audio",
     StaticFiles(directory=settings.storage_root / "audio"),
     name="generated-audio",
+)
+app.mount(
+    "/media/videos",
+    StaticFiles(directory=settings.storage_root / "videos"),
+    name="generated-videos",
 )
 app.mount(
     "/media/images",
@@ -141,3 +153,72 @@ async def generate_images(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(exc),
         ) from exc
+
+
+@app.post("/api/v1/videos/render", response_model=VideoRenderResponse)
+async def render_video(
+    request: VideoRenderRequest,
+    app_settings: Settings = Depends(get_settings),
+) -> VideoRenderResponse:
+    try:
+        return await VideoRenderer(app_settings).render(
+            title=request.title,
+            scenes=request.scenes,
+            audio=request.audio,
+            images=request.images,
+            width=request.width,
+            height=request.height,
+        )
+    except VideoRenderError as exc:
+        logger.warning("Video rendering failed: %s", exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+async def enqueue_job(
+    job_type: str,
+    payload: dict[str, object],
+    app_settings: Settings,
+) -> JobSubmission:
+    try:
+        return await create_queue_backend(app_settings).enqueue(job_type, payload)
+    except Exception as exc:
+        logger.exception("Failed to enqueue %s job", job_type)
+        raise HTTPException(status_code=503, detail="Job queue is unavailable") from exc
+
+
+@app.post("/api/v1/jobs/audio", response_model=JobSubmission, status_code=202)
+async def enqueue_audio_job(
+    request: TTSGenerateRequest,
+    app_settings: Settings = Depends(get_settings),
+) -> JobSubmission:
+    return await enqueue_job("audio", request.model_dump(mode="json"), app_settings)
+
+
+@app.post("/api/v1/jobs/images", response_model=JobSubmission, status_code=202)
+async def enqueue_image_job(
+    request: ImageGenerateRequest,
+    app_settings: Settings = Depends(get_settings),
+) -> JobSubmission:
+    return await enqueue_job("images", request.model_dump(mode="json"), app_settings)
+
+
+@app.post("/api/v1/jobs/video", response_model=JobSubmission, status_code=202)
+async def enqueue_video_job(
+    request: VideoRenderRequest,
+    app_settings: Settings = Depends(get_settings),
+) -> JobSubmission:
+    return await enqueue_job("video", request.model_dump(mode="json"), app_settings)
+
+
+@app.get("/api/v1/jobs/{job_id}", response_model=JobStatus)
+async def get_job_status(
+    job_id: str,
+    app_settings: Settings = Depends(get_settings),
+) -> JobStatus:
+    try:
+        return await create_queue_backend(app_settings).get(job_id)
+    except JobNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception("Failed to read job %s", job_id)
+        raise HTTPException(status_code=503, detail="Job queue is unavailable") from exc
