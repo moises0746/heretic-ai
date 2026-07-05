@@ -1,81 +1,24 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 
-import Home from "./page";
+import Dashboard from "./page";
 
-const videoPlan = {
-  title: "Solar Storms Explained",
-  scenes: [
-    {
-      narration: "A solar storm begins with an eruption from the Sun.",
-      image_prompt: "A cinematic solar flare erupting into deep space",
-      duration_seconds: 60,
-    },
-  ],
-  model: "qwen3:1.7b",
-};
+describe("Dashboard", () => {
+  it("presents the local studio and working video entry point", () => {
+    render(<Dashboard />);
 
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
-
-describe("Home", () => {
-  it("renders the Heretic brand and prompt form", () => {
-    render(<Home />);
-
-    expect(screen.getByText("Heretic")).toBeInTheDocument();
-    expect(screen.getByLabelText("Video topic")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Generate 60-second script" })).toBeDisabled();
+    expect(screen.getByRole("heading", { name: "Your creative pipeline, under your control." })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Create a video/ })).toHaveAttribute("href", "/create");
+    expect(screen.getByRole("heading", { name: "Video Studio" })).toBeInTheDocument();
+    expect(screen.getAllByText("Ready")).toHaveLength(2);
   });
 
-  it("renders a structured video plan returned by the API", async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => videoPlan,
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
-      });
-    vi.stubGlobal(
-      "fetch",
-      fetchMock,
-    );
-    render(<Home />);
+  it("labels roadmap capabilities without implying they are complete", () => {
+    render(<Dashboard />);
 
-    fireEvent.change(screen.getByLabelText("Video topic"), {
-      target: { value: "Solar storms" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Generate 60-second script" }));
-
-    expect(await screen.findByRole("heading", { name: videoPlan.title })).toBeInTheDocument();
-    expect(screen.getByText(videoPlan.scenes[0].narration)).toBeInTheDocument();
-    expect(screen.getByText(/cinematic solar flare/)).toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: "Add narration" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Generate scene images" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Assemble video" })).toBeInTheDocument();
-  });
-
-  it("shows an API error and restores the submit button", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: false,
-        json: async () => ({ detail: "Ollama is unavailable" }),
-      }),
-    );
-    render(<Home />);
-
-    fireEvent.change(screen.getByLabelText("Video topic"), {
-      target: { value: "Solar storms" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Generate 60-second script" }));
-
-    expect(await screen.findByRole("alert")).toHaveTextContent("Ollama is unavailable");
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Generate 60-second script" })).toBeEnabled();
-    });
+    expect(screen.getByRole("heading", { name: "Asset Library" })).toBeInTheDocument();
+    expect(screen.getByText("Phase 6")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Character Studio" })).toBeInTheDocument();
+    expect(screen.getByText("Phase 7")).toBeInTheDocument();
   });
 });

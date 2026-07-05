@@ -1,0 +1,4 @@
+import type { Metadata } from "next";
+import StudioSection from "../studio-section";
+export const metadata: Metadata = { title: "Jobs" };
+export default function JobsPage() { return <StudioSection eyebrow="JOB QUEUE" title="Generation work, observable" description="The backend queue API is implemented. This screen will expose persisted history once project and user ownership are defined." status="API implemented" tone="ready" items={[{title:"Queued generation",description:"Audio, image, and video work runs through a consistent polling contract."},{title:"Progress states",description:"Surface queued, running, completed, and failed states without blocking the UI."},{title:"Safe retries",description:"Future persisted jobs will make recovery and audit history explicit."}]} action={{href:"/create",label:"Start a generation"}} />; }

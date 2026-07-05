@@ -1,0 +1,4 @@
+import type { Metadata } from "next";
+import StudioSection from "../studio-section";
+export const metadata: Metadata = { title: "Voices" };
+export default function VoicesPage() { return <StudioSection eyebrow="VOICE STUDIO" title="Local narration voices" description="Voice profiles and generation are implemented inside the current video workflow while a dedicated library is designed." status="Available in Create" tone="ready" items={[{title:"Reference upload",description:"Save a short recording with its exact transcript as a reusable voice profile."},{title:"Scene narration",description:"Generate one local audio asset for every scene through queued jobs."},{title:"Preview and export",description:"Review clips before they enter the final MP4 assembly."}]} action={{href:"/create",label:"Open video workflow"}} />; }

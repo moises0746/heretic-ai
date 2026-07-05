@@ -1,0 +1,4 @@
+import type { Metadata } from "next";
+import StudioSection from "../studio-section";
+export const metadata: Metadata = { title: "Projects" };
+export default function ProjectsPage() { return <StudioSection eyebrow="PROJECTS" title="Creative work, organized" description="Project persistence will connect generations, assets, and exports after the authentication foundation is complete." status="Foundation pending" items={[{title:"Project history",description:"Keep prompts, scripts, generated media, and exports together."},{title:"Version control",description:"Preserve iterations without overwriting previous creative decisions."},{title:"Collaboration",description:"Add shared projects only after secure user and workspace boundaries exist."}]} action={{href:"/create",label:"Create without saving"}} />; }
