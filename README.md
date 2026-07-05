@@ -5,11 +5,12 @@
 Build a complete self-hosted AI Creative Studio capable of generating professional marketing content from a single prompt.
 
 Instead of only creating videos, the platform becomes an all-in-one AI content production suite.
+<img width="1459" height="1250" alt="image" src="https://github.com/user-attachments/assets/54de158e-d4d7-4ed9-9771-f58708318a5c" />
+
 
 ```
 Prompt → AI Story Planner → Script, Storyboard, Voice, Images, Video, Music, Subtitles, Podcast, Blog, Social Media, Commercial, Vlog, Product Ads, Presentation, Marketing Assets
 ```
-<img width="1459" height="1250" alt="image" src="https://github.com/user-attachments/assets/227d5560-274f-458f-8864-86e35408c7f3" />
 
 ---
 
