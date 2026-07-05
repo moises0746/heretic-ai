@@ -1,0 +1,14 @@
+.env
+.env.local
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+node_modules/
+.next/
+coverage/
+storage/cache/*
+storage/videos/*
+!storage/cache/.gitkeep
+!storage/videos/.gitkeep
+

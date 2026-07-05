@@ -159,6 +159,7 @@ ai-video-generator/
 - Next.js UI
 - FastAPI backend
 - Ollama integration
+- login page
 
 ### Phase 2
 
@@ -191,6 +192,36 @@ ai-video-generator/
 - Social media publishing
 - Mobile app
 - SaaS deployment
+
+------------------------------------------------------------------------
+
+## Local Development
+
+Prerequisites: Python 3.12, Node.js 20.9 or newer, and Ollama with the
+configured model available locally.
+
+Backend (PowerShell):
+
+``` powershell
+cd backend
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
+Copy-Item .env.example .env
+uvicorn app.main:app --reload
+```
+
+Frontend (a second PowerShell terminal):
+
+``` powershell
+cd frontend
+npm install
+Copy-Item .env.example .env.local
+npm run dev
+```
+
+Verify the API at `http://127.0.0.1:8000/health` and open the UI at
+`http://localhost:3000`.
 
 ------------------------------------------------------------------------
 
