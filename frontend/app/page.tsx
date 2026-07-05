@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Image from "next/image";
+import ImagePanel from "./image-panel";
 import VoicePanel from "./voice-panel";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -97,6 +98,7 @@ export default function Home() {
               ))}
             </ol>
             <VoicePanel apiBaseUrl={apiBaseUrl} scenes={videoPlan.scenes} />
+            <ImagePanel apiBaseUrl={apiBaseUrl} scenes={videoPlan.scenes} />
           </article>
         )}
       </section>

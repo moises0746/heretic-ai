@@ -43,3 +43,40 @@ class TTSGenerateResponse(BaseModel):
     job_id: str
     audio: list[AudioAsset]
 
+
+class ImageGenerateRequest(BaseModel):
+    scenes: list[Scene] = Field(min_length=1, max_length=12)
+    width: int = Field(default=1280, ge=256, le=1920, multiple_of=8)
+    height: int = Field(default=720, ge=256, le=1920, multiple_of=8)
+    seed: int = Field(default=0, ge=0, le=2_147_483_647)
+
+
+class ImageAsset(BaseModel):
+    scene_index: int = Field(ge=1)
+    prompt: str
+    seed: int
+    path: str
+    url: str
+
+
+class ImageGenerateResponse(BaseModel):
+    job_id: str
+    images: list[ImageAsset]
+
+
+class VideoRenderRequest(BaseModel):
+    title: str = Field(min_length=1, max_length=120)
+    scenes: list[Scene] = Field(min_length=1, max_length=12)
+    audio: list[AudioAsset] = Field(min_length=1, max_length=12)
+    images: list[ImageAsset] = Field(min_length=1, max_length=12)
+    width: int = Field(default=1280, ge=256, le=1920, multiple_of=2)
+    height: int = Field(default=720, ge=256, le=1920, multiple_of=2)
+
+
+class VideoRenderResponse(BaseModel):
+    job_id: str
+    video_path: str
+    video_url: str
+    subtitle_path: str
+    subtitle_url: str
+

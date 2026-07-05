@@ -54,7 +54,8 @@ Subtitles → MP4
 
 #### Image Generation
 
-- FLUX.1-dev
+- FLUX.1-schnell (default, Apache-2.0)
+- FLUX.1-dev (optional, non-commercial license)
 
 #### Optional Talking Avatar
 
@@ -141,13 +142,13 @@ ai-video-generator/
 
 ## Workflow
 
-1.  User enters topic.
-2.  LLM generates a 60-second script.
-3.  F5-TTS synthesizes speech using the selected cloned voice.
-4.  FLUX generates scene images.
-5.  Subtitles are created from the script.
-6.  FFmpeg assembles images, narration, subtitles, and optional music.
-7.  User downloads the finished MP4.
+1. User enters topic.
+2. LLM generates a 60-second script.
+3. F5-TTS synthesizes speech using the selected cloned voice.
+4. FLUX generates scene images.
+5. Subtitles are created from the script.
+6. FFmpeg assembles images, narration, subtitles, and optional music.
+7. User downloads the finished MP4.
 
 ------------------------------------------------------------------------
 
@@ -167,13 +168,15 @@ ai-video-generator/
 - [x] F5-TTS CLI adapter
 - [x] Local voice profile API and storage
 - [x] Per-scene narration API and audio playback UI
-- [ ] Install FFmpeg and a device-matched F5-TTS runtime
-- [ ] Validate real synthesis with reference audio
+- [x] Install FFmpeg and a device-matched F5-TTS runtime
+- [x] Validate real synthesis with reference audio
 
 ### Phase 3
 
-- FLUX image generation
-- Scene image generation from Phase 1 prompts
+- [x] Isolated FLUX inference adapter
+- [x] Per-scene image generation API and local storage
+- [x] Deterministic seeds and 16:9 image preview UI
+- [ ] Install and validate FLUX on a supported accelerator host
 
 ### Phase 4
 
@@ -191,6 +194,8 @@ ai-video-generator/
 
 ## Stretch Goals
 
+- Voice cloning
+- Speech with real emotion
 - Talking avatar
 - AI B-roll selection
 - AI thumbnail generation
@@ -256,7 +261,8 @@ F5_TTS_TIMEOUT_SECONDS=900
 ```
 
 Set `F5_TTS_DEVICE` to the accelerator supported by the installed PyTorch
-build. Keep model caches on a drive with sufficient free space. Reference
+build. CPU-only generation is supported but may take several minutes per
+scene. Keep model caches on a drive with sufficient free space. Reference
 recordings should be shorter than 12 seconds and include an exact transcript;
 see the [official inference guidance](https://github.com/SWivid/F5-TTS/blob/main/src/f5_tts/infer/README.md).
 
@@ -266,6 +272,32 @@ Phase 2 API flow:
 2. `GET /api/v1/voices` to list local profiles.
 3. `POST /api/v1/audio/generate` with a voice profile ID and scene list.
 4. Play generated WAV files from the returned local `/media/...` URLs.
+
+### Phase 3 image configuration
+
+The default model is `FLUX.1-schnell` because its Apache-2.0 license permits
+commercial use. `FLUX.1-dev` is optional and uses a non-commercial model
+license. Run the image model in a separate environment on a supported CUDA or
+MPS host; full FLUX components require substantially more memory than the
+FastAPI server.
+
+Install `torch`, `diffusers`, `transformers`, and `accelerate` in that isolated
+environment, accept the model access conditions on Hugging Face, and configure
+the backend `.env` without committing access tokens:
+
+``` dotenv
+FLUX_PYTHON_COMMAND=C:\path\to\flux-runtime\python.exe
+FLUX_SCRIPT=..\scripts\flux_infer.py
+FLUX_MODEL=black-forest-labs/FLUX.1-schnell
+FLUX_DEVICE=cuda
+FLUX_STEPS=4
+FLUX_TIMEOUT_SECONDS=1800
+FLUX_CACHE_DIR=D:\path\to\model-cache
+```
+
+`POST /api/v1/images/generate` accepts the Phase 1 scene list, dimensions, and
+a base seed. It generates one local PNG per scene and returns `/media/images/...`
+URLs for preview and later video assembly.
 
 ------------------------------------------------------------------------
 

@@ -8,11 +8,14 @@ from app.config import Settings, get_settings
 from app.schemas import (
     ScriptGenerateRequest,
     ScriptGenerateResponse,
+    ImageGenerateRequest,
+    ImageGenerateResponse,
     TTSGenerateRequest,
     TTSGenerateResponse,
     VoiceProfile,
 )
 from app.services.ollama import OllamaService, OllamaUnavailableError
+from app.services.image import FluxImageService, ImageGenerationError
 from app.services.tts import F5TTSService, TTSUnavailableError
 from app.services.voices import VoiceProfileError, VoiceProfileRepository
 
@@ -22,6 +25,8 @@ MAX_REFERENCE_AUDIO_BYTES = 25 * 1024 * 1024
 
 settings = get_settings()
 settings.storage_root.mkdir(parents=True, exist_ok=True)
+(settings.storage_root / "audio").mkdir(parents=True, exist_ok=True)
+(settings.storage_root / "images").mkdir(parents=True, exist_ok=True)
 app = FastAPI(title="Heretic AI API", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
@@ -30,7 +35,16 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
-app.mount("/media", StaticFiles(directory=settings.storage_root), name="media")
+app.mount(
+    "/media/audio",
+    StaticFiles(directory=settings.storage_root / "audio"),
+    name="generated-audio",
+)
+app.mount(
+    "/media/images",
+    StaticFiles(directory=settings.storage_root / "images"),
+    name="generated-images",
+)
 
 
 @app.get("/health")
@@ -103,6 +117,26 @@ async def generate_audio(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except TTSUnavailableError as exc:
         logger.warning("Audio generation failed: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
+
+
+@app.post("/api/v1/images/generate", response_model=ImageGenerateResponse)
+async def generate_images(
+    request: ImageGenerateRequest,
+    app_settings: Settings = Depends(get_settings),
+) -> ImageGenerateResponse:
+    try:
+        return await FluxImageService(app_settings).generate(
+            scenes=request.scenes,
+            width=request.width,
+            height=request.height,
+            seed=request.seed,
+        )
+    except ImageGenerationError as exc:
+        logger.warning("Image generation failed: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(exc),

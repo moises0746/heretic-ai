@@ -17,6 +17,17 @@ class Settings(BaseSettings):
     f5_tts_model: str = "F5TTS_v1_Base"
     f5_tts_device: str = ""
     f5_tts_timeout_seconds: float = 900
+    f5_tts_cache_dir: Path | None = None
+    f5_tts_ffmpeg_dir: Path | None = None
+    flux_python_command: str = "python"
+    flux_script: Path = PROJECT_ROOT / "scripts" / "flux_infer.py"
+    flux_model: str = "black-forest-labs/FLUX.1-schnell"
+    flux_device: str = "cuda"
+    flux_steps: int = 4
+    flux_timeout_seconds: float = 1800
+    flux_cache_dir: Path | None = None
+    ffmpeg_command: str = "ffmpeg"
+    ffmpeg_timeout_seconds: float = 900
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

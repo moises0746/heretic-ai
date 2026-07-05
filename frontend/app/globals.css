@@ -31,7 +31,7 @@ main {
 .eyebrow { color: #ad8cff; font-weight: 700; letter-spacing: .16em; }
 h1 { font-size: clamp(2.5rem, 7vw, 5.5rem); line-height: .98; margin: 24px 0; }
 .subtitle { color: #aeb6c4; font-size: 1.2rem; }
-form, .result, .voice-panel {
+form, .result, .voice-panel, .image-panel {
   display: grid;
   gap: 14px;
   margin-top: 40px;
@@ -120,4 +120,29 @@ input, select {
 .audio-list li { display: grid; gap: 8px; }
 .audio-list span { font-size: .85rem; font-weight: 750; }
 .audio-list audio { width: 100%; }
+.image-panel { margin-top: 18px; background: #11141c; }
+.image-panel h2 { margin: 0; }
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.panel-heading button { flex: 0 0 auto; }
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.image-grid li { overflow: hidden; border: 1px solid #343946; border-radius: 12px; background: #0c0f15; }
+.image-grid img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.image-grid li div { display: flex; justify-content: space-between; gap: 12px; padding: 12px; }
+.image-grid span { color: #aeb6c4; font-size: .8rem; }
+@media (max-width: 640px) {
+  .panel-heading { align-items: stretch; flex-direction: column; }
+  .image-grid { grid-template-columns: 1fr; }
+}
 

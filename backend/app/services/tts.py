@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import shutil
 from pathlib import Path
 from typing import Protocol
@@ -20,6 +21,9 @@ class CommandRunner(Protocol):
 
 
 class SubprocessCommandRunner:
+    def __init__(self, environment: dict[str, str] | None = None) -> None:
+        self.environment = environment or {}
+
     async def run(self, command: list[str], timeout_seconds: float) -> None:
         executable = shutil.which(command[0])
         if executable is None:
@@ -27,10 +31,13 @@ class SubprocessCommandRunner:
                 "F5-TTS CLI is not installed or F5_TTS_COMMAND is incorrect"
             )
         command[0] = executable
+        environment = os.environ.copy()
+        environment.update(self.environment)
         process = await asyncio.create_subprocess_exec(
             *command,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
+            env=environment,
         )
         try:
             stdout, stderr = await asyncio.wait_for(
@@ -55,7 +62,15 @@ class F5TTSService:
     ) -> None:
         self.settings = settings
         self.storage_root = settings.storage_root.resolve()
-        self.runner = runner or SubprocessCommandRunner()
+        environment: dict[str, str] = {}
+        if settings.f5_tts_cache_dir:
+            environment["HF_HOME"] = str(settings.f5_tts_cache_dir.resolve())
+        if settings.f5_tts_ffmpeg_dir:
+            environment["PATH"] = (
+                f"{settings.f5_tts_ffmpeg_dir.resolve()}{os.pathsep}"
+                f"{os.environ.get('PATH', '')}"
+            )
+        self.runner = runner or SubprocessCommandRunner(environment)
 
     async def generate(
         self,
@@ -109,4 +124,3 @@ class F5TTSService:
             raise
 
         return TTSGenerateResponse(job_id=job_id, audio=audio_assets)
-
